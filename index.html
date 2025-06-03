@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LogiLead System Design - Revenue Vessel</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #ffffff;
+        color: #1a1a1a;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      .header {
+        background: #ffffff;
+        border-bottom: 1px solid #e5e5e5;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        padding: 15px 0;
+      }
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: 700;
+        color: #2563eb;
+      }
+      .nav {
+        display: flex;
+        gap: 30px;
+      }
+      .nav-item {
+        color: #666;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s;
+        cursor: pointer;
+      }
+      .nav-item:hover,
+      .nav-item.active {
+        color: #2563eb;
+      }
+      .main {
+        margin-top: 80px;
+        padding: 40px 0;
+      }
+      .slide {
+        display: none;
+        min-height: 80vh;
+        padding: 60px 0;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+      }
+      .slide.active {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .slide-title {
+        font-size: 48px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .slide-subtitle {
+        font-size: 20px;
+        color: #666;
+        text-align: center;
+        margin-bottom: 60px;
+      }
+      .hero {
+        text-align: center;
+        padding: 100px 0;
+      }
+      .hero h1 {
+        font-size: 64px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hero .subtitle {
+        font-size: 24px;
+        color: #666;
+        margin-bottom: 40px;
+      }
+      .hero .tagline {
+        font-size: 18px;
+        color: #888;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: start;
+        margin: 40px 0;
+      }
+      .feature-list {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 30px;
+        margin: 20px 0;
+      }
+      .feature-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #ffffff;
+        border-radius: 8px;
+        border-left: 4px solid #2563eb;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .feature-icon {
+        width: 24px;
+        height: 24px;
+        background: #2563eb;
+        border-radius: 50%;
+        margin-right: 15px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+      }
+      .architecture-diagram {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 40px;
+        margin: 30px 0;
+        text-align: center;
+      }
+      .architecture-layer {
+        background: #ffffff;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 15px 0;
+        transition: all 0.3s ease;
+      }
+      .architecture-layer:hover {
+        border-color: #2563eb;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+      }
+      .architecture-layer h4 {
+        color: #2563eb;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      .tech-stack {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
+      }
+      .tech-card {
+        background: #ffffff;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+      .tech-card:hover {
+        border-color: #2563eb;
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.1);
+      }
+      .tech-card h4 {
+        color: #2563eb;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      .timeline {
+        position: relative;
+        margin: 40px 0;
+      }
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e5e7eb;
+        transform: translateX(-50%);
+      }
+      .timeline-item {
+        position: relative;
+        margin: 40px 0;
+        display: flex;
+        align-items: center;
+      }
+      .timeline-item:nth-child(odd) {
+        flex-direction: row;
+      }
+      .timeline-item:nth-child(even) {
+        flex-direction: row-reverse;
+      }
+      .timeline-content {
+        background: #ffffff;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 25px;
+        width: 45%;
+        transition: all 0.3s ease;
+      }
+      .timeline-content:hover {
+        border-color: #2563eb;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+      }
+      .timeline-marker {
+        position: absolute;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        background: #2563eb;
+        border-radius: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+      }
+      .phase-title {
+        color: #2563eb;
+        font-weight: 600;
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+      .phase-duration {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 15px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        background: #2563eb;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        margin: 10px 5px;
+      }
+      .btn:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      }
+      .btn-secondary {
+        background: #f1f5f9;
+        color: #2563eb;
+        border: 2px solid #e5e7eb;
+      }
+      .btn-secondary:hover {
+        background: #e2e8f0;
+        border-color: #2563eb;
+      }
+      .slide-nav {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 15px;
+        z-index: 1000;
+      }
+      .slide-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .slide-indicator.active {
+        background: #2563eb;
+        transform: scale(1.2);
+      }
+      @media (max-width: 768px) {
+        .content-grid {
+          grid-template-columns: 1fr;
+          gap: 30px;
+        }
+        .hero h1 {
+          font-size: 40px;
+        }
+        .slide-title {
+          font-size: 32px;
+        }
+        .nav {
+          display: none;
+        }
+        .timeline::before {
+          left: 20px;
+        }
+        .timeline-item {
+          flex-direction: row !important;
+          padding-left: 50px;
+        }
+        .timeline-content {
+          width: 100%;
+        }
+        .timeline-marker {
+          left: 20px;
+        }
+      }
+    </style>
+    <script>
+      let currentSlide = 0;
+      const totalSlides = 6;
+      function showSlide(index) {
+        const slides = document.querySelectorAll(".slide");
+        const navItems = document.querySelectorAll(".nav-item");
+        const indicators = document.querySelectorAll(".slide-indicator");
+        slides.forEach((slide) => slide.classList.remove("active"));
+        navItems.forEach((item) => item.classList.remove("active"));
+        indicators.forEach((indicator) => indicator.classList.remove("active"));
+        if (slides[index]) slides[index].classList.add("active");
+        if (navItems[index]) navItems[index].classList.add("active");
+        if (indicators[index]) indicators[index].classList.add("active");
+        currentSlide = index;
+      }
+      function nextSlide() {
+        showSlide((currentSlide + 1) % totalSlides);
+      }
+      function prevSlide() {
+        showSlide((currentSlide - 1 + totalSlides) % totalSlides);
+      }
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "ArrowRight") nextSlide();
+        else if (event.key === "ArrowLeft") prevSlide();
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        showSlide(0);
+        document.querySelectorAll(".nav-item").forEach((item, index) => {
+          item.addEventListener("click", function (e) {
+            e.preventDefault();
+            showSlide(index);
+          });
+        });
+        document
+          .querySelectorAll(".slide-indicator")
+          .forEach((indicator, index) => {
+            indicator.addEventListener("click", function (e) {
+              e.preventDefault();
+              showSlide(index);
+            });
+          });
+      });
+    </script>
+  </head>
+  <body>
+    <header class="header">
+      <div class="container">
+        <div class="header-content">
+          <div class="logo">LogiLead</div>
+          <nav class="nav">
+            <a href="#" class="nav-item active">Overview</a>
+            <a href="#" class="nav-item">Requirements</a>
+            <a href="#" class="nav-item">Architecture</a>
+            <a href="#" class="nav-item">Database</a>
+            <a href="#" class="nav-item">API Design</a>
+            <a href="#" class="nav-item">Implementation</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- Slide 1: Overview -->
+      <section class="slide active" id="slide-0">
+        <div class="container">
+          <div class="hero">
+            <h1>LogiLead</h1>
+            <p class="subtitle">Automated Logistics Lead Generation Platform</p>
+            <p class="tagline">
+              Transform government data into actionable sales opportunities for
+              logistics teams
+            </p>
+            <div style="margin-top: 60px">
+              <div class="content-grid">
+                <div>
+                  <h3 style="color: #2563eb; margin-bottom: 20px">
+                    The Challenge
+                  </h3>
+                  <p>
+                    Sales teams struggle to identify new logistics opportunities
+                    from scattered government data sources. Manual processes
+                    miss opportunities and waste valuable time.
+                  </p>
+                </div>
+                <div>
+                  <h3 style="color: #2563eb; margin-bottom: 20px">
+                    The Solution
+                  </h3>
+                  <p>
+                    LogiLead automatically scrapes, processes, and presents
+                    government logistics data in an intuitive interface designed
+                    for sales teams.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 2: Requirements -->
+      <section class="slide" id="slide-1">
+        <div class="container">
+          <h2 class="slide-title">Functional Requirements</h2>
+          <p class="slide-subtitle">Core features and capabilities</p>
+          <div class="content-grid">
+            <div>
+              <h3 style="color: #2563eb; margin-bottom: 30px">In Scope</h3>
+              <div class="feature-list">
+                <div class="feature-item">
+                  <div class="feature-icon">✓</div>
+                  <div>
+                    <strong>Automated Data Retrieval</strong><br />Download and
+                    extract zip files from freedata.gov on-demand
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <div class="feature-icon">✓</div>
+                  <div>
+                    <strong>Intelligent Processing</strong><br />Parse multiple
+                    file formats with flexible schema detection
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <div class="feature-icon">✓</div>
+                  <div>
+                    <strong>Time-Based Filtering</strong><br />Filter data by
+                    week, month, or year for focused prospecting
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <div class="feature-icon">✓</div>
+                  <div>
+                    <strong>Real-Time Updates</strong><br />Live status updates
+                    and notifications during processing
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 style="color: #666; margin-bottom: 30px">
+                Out of Scope (Phase 1)
+              </h3>
+              <div class="feature-list">
+                <div class="feature-item" style="opacity: 0.6">
+                  <div class="feature-icon" style="background: #999">✗</div>
+                  <div>
+                    <strong>Advanced Search</strong><br />Text search and
+                    complex filtering capabilities
+                  </div>
+                </div>
+                <div class="feature-item" style="opacity: 0.6">
+                  <div class="feature-icon" style="background: #999">✗</div>
+                  <div>
+                    <strong>Data Export</strong><br />Export functionality for
+                    external systems
+                  </div>
+                </div>
+                <div class="feature-item" style="opacity: 0.6">
+                  <div class="feature-icon" style="background: #999">✗</div>
+                  <div>
+                    <strong>Multiple Sources</strong><br />Integration with
+                    additional government databases
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3: Architecture -->
+      <section class="slide" id="slide-2">
+        <div class="container">
+          <h2 class="slide-title">System Architecture</h2>
+          <p class="slide-subtitle">
+            Scalable, cloud-native design with read/write separation
+          </p>
+          <div class="architecture-diagram">
+            <div class="architecture-layer">
+              <h4>Frontend Layer</h4>
+              <p>React.js + Bootstrap + RTK Query + Redux Toolkit</p>
+            </div>
+            <div class="architecture-layer">
+              <h4>API Gateway & Authentication</h4>
+              <p>Django REST Framework + Firebase Auth + JWT</p>
+            </div>
+            <div class="architecture-layer">
+              <h4>Backend Services</h4>
+              <p>
+                Django Apps: Data Ingestion | Processing | Notification | User
+                Management
+              </p>
+            </div>
+            <div class="architecture-layer">
+              <h4>Data Processing</h4>
+              <p>Celery Workers + Redis Queue</p>
+            </div>
+            <div class="architecture-layer">
+              <h4>Data Storage</h4>
+              <p>PostgreSQL (Primary + Read Replica) + Redis + S3</p>
+            </div>
+            <div class="architecture-layer">
+              <h4>Infrastructure</h4>
+              <p>AWS EKS (Kubernetes) + RDS + ElastiCache + S3</p>
+            </div>
+          </div>
+          <div class="tech-stack">
+            <div class="tech-card">
+              <h4>Frontend</h4>
+              <p>React.js<br />Bootstrap<br />RTK Query</p>
+            </div>
+            <div class="tech-card">
+              <h4>Backend</h4>
+              <p>Django REST<br />Celery<br />Redis</p>
+            </div>
+            <div class="tech-card">
+              <h4>Database</h4>
+              <p>PostgreSQL<br />Read Replicas<br />Partitioning</p>
+            </div>
+            <div class="tech-card">
+              <h4>Cloud</h4>
+              <p>AWS EKS<br />RDS<br />S3</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4: Database -->
+      <section class="slide" id="slide-3">
+        <div class="container">
+          <h2 class="slide-title">Database Design</h2>
+          <p class="slide-subtitle">
+            Optimized for millions of records with intelligent partitioning
+          </p>
+          <div class="content-grid">
+            <div>
+              <h3 style="color: #2563eb; margin-bottom: 20px">
+                Key Design Features
+              </h3>
+              <div class="feature-list">
+                <div class="feature-item">
+                  <div class="feature-icon">📊</div>
+                  <div>
+                    <strong>Monthly Partitioning</strong><br />Automatic
+                    partitioning by date for optimal query performance
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <div class="feature-icon">🔄</div>
+                  <div>
+                    <strong>Read/Write Separation</strong><br />Primary database
+                    for writes, read replica for queries
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <div class="feature-icon">🗑️</div>
+                  <div>
+                    <strong>Soft Deletes</strong><br />Data recovery and audit
+                    trail capabilities
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 style="color: #2563eb; margin-bottom: 20px">Core Tables</h3>
+              <div
+                style="background: #f8fafc; padding: 20px; border-radius: 8px"
+              >
+                <h4 style="color: #2563eb; margin-bottom: 10px">
+                  logistics_data (Partitioned)
+                </h4>
+                <pre style="font-size: 12px">
+id, job_id, company_name, 
+shipper_name, origin_port,
+destination_port, shipment_date,
+weight_kg, additional_data JSONB</pre
+                >
+              </div>
+              <div
+                style="
+                  background: #f8fafc;
+                  padding: 20px;
+                  border-radius: 8px;
+                  margin-top: 15px;
+                "
+              >
+                <h4 style="color: #2563eb; margin-bottom: 10px">
+                  processing_jobs
+                </h4>
+                <pre style="font-size: 12px">
+id, celery_task_id, user_id,
+status, records_processed</pre
+                >
+              </div>
+            </div>
+          </div>
+          <div
+            style="
+              margin-top: 40px;
+              text-align: center;
+              background: #f8fafc;
+              padding: 30px;
+              border-radius: 12px;
+            "
+          >
+            <h3 style="color: #2563eb; margin-bottom: 15px">
+              Performance Benefits
+            </h3>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 30px;
+              "
+            >
+              <div>
+                <h4>Week Filter</h4>
+                <p>Queries only recent partition</p>
+              </div>
+              <div>
+                <h4>Month Filter</h4>
+                <p>Queries 1-2 partitions max</p>
+              </div>
+              <div>
+                <h4>Year Filter</h4>
+                <p>Queries 12 partitions max</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 5: API Design -->
+      <section class="slide" id="slide-4">
+        <div class="container">
+          <h2 class="slide-title">API Design</h2>
+          <p class="slide-subtitle">
+            RESTful endpoints with read/write optimization
+          </p>
+          <div class="content-grid">
+            <div>
+              <h3 style="color: #2563eb; margin-bottom: 30px">
+                Write Operations (Primary DB)
+              </h3>
+              <div class="feature-list">
+                <div class="feature-item">
+                  <div class="feature-icon">🔐</div>
+                  <div>
+                    <strong>POST /auth/login/</strong><br />Firebase token
+                    validation and JWT generation
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <div class="feature-icon">📥</div>
+                  <div>
+                    <strong>POST /data-ingestion/jobs/</strong><br />Trigger new
+                    data fetch from freedata.gov
+                  </div>
+                </div>
+              </div>
+              <h3 style="color: #2563eb; margin-bottom: 30px; margin-top: 40px">
+                Real-Time Updates
+              </h3>
+              <div class="feature-list">
+                <div class="feature-item">
+                  <div class="feature-icon">⚡</div>
+                  <div>
+                    <strong>WebSocket Connections</strong><br />Live job status
+                    updates and progress tracking
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 style="color: #2563eb; margin-bottom: 30px">
+                Read Operations (Read Replica)
+              </h3>
+              <div class="feature-list">
+                <div class="feature-item">
+                  <div class="feature-icon">📋</div>
+                  <div>
+                    <strong>GET /logistics-data/</strong><br />Paginated data
+                    with time-based filtering
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <div class="feature-icon">💾</div>
+                  <div>
+                    <strong>RTK Query Integration</strong><br />Automatic
+                    caching and optimistic updates
+                  </div>
+                </div>
+              </div>
+              <div
+                style="
+                  background: #f8fafc;
+                  padding: 20px;
+                  border-radius: 8px;
+                  margin-top: 30px;
+                "
+              >
+                <h4 style="color: #2563eb; margin-bottom: 15px">
+                  Sample Response
+                </h4>
+                <pre style="font-size: 11px">
+{
+  "count": 150000,
+  "results": [{
+    "company_name": "ABC Shipping Co",
+    "origin_port": "Shanghai",
+    "destination_port": "Los Angeles"
+  }]
+}</pre
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6: Implementation -->
+      <section class="slide" id="slide-5">
+        <div class="container">
+          <h2 class="slide-title">Implementation Roadmap</h2>
+          <p class="slide-subtitle">4-phase approach over 17 weeks</p>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <div class="phase-title">
+                  Phase 1: Foundation & Infrastructure
+                </div>
+                <div class="phase-duration">Weeks 1-6 (6 weeks)</div>
+                <p>
+                  <strong>Deliverables:</strong> AWS EKS cluster, PostgreSQL
+                  with read replicas, Django REST setup, React app shell,
+                  Firebase auth integration, database schema with partitioning
+                </p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <div class="phase-title">Phase 2: Data Ingestion Pipeline</div>
+                <div class="phase-duration">Weeks 7-10 (4 weeks)</div>
+                <p>
+                  <strong>Deliverables:</strong> Celery workers, zip file
+                  processing, flexible schema detection, data validation, S3
+                  integration, WebSocket real-time updates, email notifications
+                </p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <div class="phase-title">
+                  Phase 3: Data Display & User Interface
+                </div>
+                <div class="phase-duration">Weeks 11-14 (4 weeks)</div>
+                <p>
+                  <strong>Deliverables:</strong> Data table with Bootstrap
+                  styling, RTK Query integration, time-based filtering,
+                  pagination, "Fetch New Data" functionality, performance
+                  optimization
+                </p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <div class="phase-title">
+                  Phase 4: Production Ready & Launch
+                </div>
+                <div class="phase-duration">Weeks 15-17 (3 weeks)</div>
+                <p>
+                  <strong>Deliverables:</strong> Comprehensive testing,
+                  production deployment, monitoring setup, backup/disaster
+                  recovery, documentation, user training, go-live support
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 60px">
+            <div class="content-grid">
+              <div>
+                <h3 style="color: #2563eb; margin-bottom: 20px">
+                  Resource Requirements
+                </h3>
+                <div class="feature-list">
+                  <div class="feature-item">
+                    <div class="feature-icon">👨‍💻</div>
+                    <div>
+                      <strong>Development Team</strong><br />Backend Developer
+                      (Django), Frontend Developer (React), DevOps Engineer
+                      (AWS/K8s), Project Manager/QA
+                    </div>
+                  </div>
+                  <div class="feature-item">
+                    <div class="feature-icon">💰</div>
+                    <div>
+                      <strong>Infrastructure Cost</strong><br />~$650/month (EKS
+                      ~$150, RDS ~$300, ElastiCache ~$100, S3 ~$50, Networking
+                      ~$50)
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 style="color: #2563eb; margin-bottom: 20px">
+                  Success Metrics
+                </h3>
+                <div class="feature-list">
+                  <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <div>
+                      <strong>Performance</strong><br />Sub-3-second page loads,
+                      60-minute max processing time
+                    </div>
+                  </div>
+                  <div class="feature-item">
+                    <div class="feature-icon">🎯</div>
+                    <div>
+                      <strong>User Experience</strong><br />Intuitive interface
+                      requiring minimal training
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style="
+              text-align: center;
+              margin-top: 60px;
+              padding: 40px;
+              background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+              border-radius: 12px;
+            "
+          >
+            <h3 style="color: #2563eb; margin-bottom: 20px">
+              Ready to Transform Logistics Lead Generation
+            </h3>
+            <p style="font-size: 18px; color: #666; margin-bottom: 30px">
+              LogiLead will revolutionize how Revenue Vessel's clients discover
+              new business opportunities
+            </p>
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                flex-wrap: wrap;
+              "
+            >
+              <button class="btn" onclick="showSlide(0)">Start Over</button>
+              <button class="btn btn-secondary" onclick="window.print()">
+                Print Presentation
+              </button>
+            </div>
+            <div
+              style="
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #e5e7eb;
+              "
+            >
+              <h4 style="color: #2563eb; margin-bottom: 15px">Next Steps</h4>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(4, 1fr);
+                  gap: 20px;
+                "
+              >
+                <div>
+                  <strong>Week 1:</strong><br /><span style="color: #666"
+                    >Approve scope & budget</span
+                  >
+                </div>
+                <div>
+                  <strong>Week 2:</strong><br /><span style="color: #666"
+                    >Assemble dev team</span
+                  >
+                </div>
+                <div>
+                  <strong>Week 3:</strong><br /><span style="color: #666"
+                    >Begin infrastructure</span
+                  >
+                </div>
+                <div>
+                  <strong>Week 20:</strong><br /><span style="color: #666"
+                    >LogiLead goes live</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="slide-nav">
+      <div class="slide-indicator active"></div>
+      <div class="slide-indicator"></div>
+      <div class="slide-indicator"></div>
+      <div class="slide-indicator"></div>
+      <div class="slide-indicator"></div>
+      <div class="slide-indicator"></div>
+    </div>
+  </body>
+</html>
